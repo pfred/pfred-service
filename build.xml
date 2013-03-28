@@ -1,0 +1,121 @@
+
+<project name="PFREDService" default="compile" basedir=".">
+
+    <property file="${basedir}/build.properties" />
+
+    <property name="name"      value="PFREDService" />
+    <property name="version"      value="1.0" />
+	<!-- BUILD PROPERTIES ADJUST THESE FOR YOUR ENVIRONMENT -->
+    <property name="base.dir" value="." />
+    <property name="lib.dir" value="${base.dir}/lib" />
+    <property name="src.dir" value="${base.dir}/src" />
+    <property name="web.dir" value="${base.dir}/web" />
+    <property name="build.dir" value="${base.dir}/build" />
+    <property name="dist.dir" value="${base.dir}/dist" />
+    <property name="publish.dir" value="${base.dir}/publish" />
+    <property name="sample.dir" value="${base.dir}/sample" />
+
+    <property name="jar.file.name" value="${name}-${version}.jar" />
+    <property name="war.file.name" value="${name}-${version}.war" />
+
+    <!-- compile parameter -->
+    <property name="compile.optimize"    value="true" />
+    <property name="compile.target"      value="1.6" />
+    <property name="compile.source"      value="1.6" />
+    <property name="verbose" value="true" />
+    <property name="compiler" value="modern" />
+    <property name="debug" value="yes" />
+    <property name="deprecation" value="yes" />
+	
+    <path id="build.class.path">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar" />
+            <include name="xfire/*.jar" />
+        </fileset>
+    </path>
+
+    <!-- clean everything -->
+    <target name="clean" description="Deletes the build directory and final jar file">
+        <delete dir="${dist.dir}" />
+        <delete dir="${build.dir}" />
+    </target>
+
+	<!-- initialize the file system -->
+    <target name="init" depends="clean">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${dist.dir}" />
+    </target>
+    
+    <target name="compile" description="Compiles concrete classes of the application" depends="init">
+        <javac srcdir="${src.dir}"
+                destdir="${build.dir}" 
+                deprecation="${deprecation}" 
+                debug="${debug}"
+                optimize="${compile.optimize}" 
+                target="${compile.target}" 
+                source="${compile.source}" >
+            <classpath refid="build.class.path" />
+        </javac>
+    </target>
+
+
+    <!-- copy everything needed into dist directory -->
+    <target name="build_webapp" depends="compile">
+        <copy todir="${dist.dir}">
+            <fileset dir="${web.dir}" >
+                <include name="**/*" />
+            </fileset>
+        </copy>
+
+        <mkdir dir="${dist.dir}/WEB-INF/classes" />
+        <copy todir="${dist.dir}/WEB-INF/classes">
+            <fileset dir="${src.dir}" >
+                <include name="META-INF/xfire/services.xml" />
+            </fileset>
+        </copy>
+        <copy todir="${dist.dir}/WEB-INF/classes">
+            <fileset dir="${build.dir}" >
+                <patternset id="compiled.classes">
+                    <include name="**/*.class" />
+                </patternset>
+            </fileset>
+        </copy>
+
+        <mkdir dir="${dist.dir}/WEB-INF/lib" />
+        <copy todir="${dist.dir}/WEB-INF/lib" flatten="true">
+            <filelist id="jarfiles" dir="${lib.dir}">
+                <file name="xfire/activation-1.1.jar" />
+                <file name="xfire/commons-beanutils-1.7.0.jar" />
+                <file name="xfire/commons-codec-1.3.jar" />
+                <file name="xfire/commons-logging-1.0.4.jar" />
+                <file name="xfire/jaxen-1.1-beta-9.jar" />
+                <file name="xfire/jaxws-api-2.0.jar" />
+                <file name="xfire/jsr173_api-1.0.jar" />
+                <file name="xfire/mail-1.4.jar" />
+                <file name="xfire/saaj-api-1.3.jar" />
+                <file name="xfire/saaj-impl-1.3.jar" />
+                <file name="xfire/spring-1.2.6.jar" />
+                <file name="xfire/stax-api-1.0.1.jar" />
+                <file name="xfire/wsdl4j-1.6.1.jar" />
+                <file name="xfire/wstx-asl-3.2.0.jar" />
+                <file name="xfire/xbean-2.2.0.jar" />
+                <file name="xfire/xbean-spring-2.8.jar" />
+                <file name="xfire/xfire-aegis-1.2.6.jar" />
+                <file name="xfire/xfire-annotations-1.2.6.jar" />
+                <file name="xfire/xfire-core-1.2.6.jar" />
+                <file name="xfire/xfire-java5-1.2.6.jar" />
+                <file name="xfire/xfire-jaxws-1.2.6.jar" />
+                <file name="xfire/xfire-jsr181-api-1.0-M1.jar" />
+                <file name="xfire/xfire-spring-1.2.6.jar" />
+                <file name="xfire/XmlSchema-1.1.jar" />
+                <file name="xfire/jdom-1.0.jar" />
+            </filelist>
+        </copy>
+    </target>
+
+    <target name="publish" depends="build_webapp">
+        <war destfile="${publish.dir}/${war.file.name}" basedir="${dist.dir}" />
+    </target>
+       
+</project>
+
