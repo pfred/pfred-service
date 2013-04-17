@@ -19,7 +19,7 @@ $registry->load_registry_from_db(
 -host => 'ensembldb.ensembl.org',
 -port => '5306',
 -user => 'anonymous',
--verbose => '1'
+#-verbose => '1'
 );
 
 #return $registry;
@@ -38,12 +38,15 @@ my $dbA;
 if ($list!~/^$/){
 my @cols=split(/\t/,$list);
 #print STDERR "Getting db adaptor for 0: $cols[0] 1: $cols[1] 2: $cols[2] 3: $cols[3]\n";
-$dbA=Bio::EnsEMBL::Variation::DBSQL::DBAdaptor->new
-    (-host   => $host,
-     -dbname => $cols[2],
-     -species => $species,
-     -group   => $group,
-     -user   => 'anonymous');
+$dbA = Bio::EnsEMBL::Variation::DBSQL::DBAdaptor->new(
+    -host    => $host,
+    -port    => $cols[4],
+    -dbname  => $cols[2],
+    -species => $species,
+    -group   => $group,
+    -user    => 'anonymous'
+);
+
 }
 return $dbA;
 }

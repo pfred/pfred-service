@@ -22,7 +22,6 @@ package org.pfred.service.sample;
 import org.pfred.service.PFREDServiceImpl;
 import org.pfred.service.IPFREDService;
 import org.pfred.service.exception.PFREDServiceException;
-import org.pfred.service.model.ResultBean;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,9 +39,9 @@ public class PFREDServiceSample {
         String result = getOrthologs(service);
         System.out.println("orthologs=" + result);
 
-        ResultBean resultBean = enumerate(service);
-        System.out.println("enumerate=" + resultBean.getResults()[0]);
-
+        String[] results = enumerate(service);
+        System.out.println("enumerate result:" + results[0]);
+        System.out.println("sequence:" + results[1]);
 
 
         antisenseOffTarget(service);
@@ -116,14 +115,11 @@ public class PFREDServiceSample {
         return null;
     }
 
-    private static ResultBean enumerate(IPFREDService service) {
+    private static String[] enumerate(IPFREDService service) {
         try {
 
             //  ResultBean resultBean = service.enumerate("test", "ENST00000378474,ENST00000336949,ENSRNOT00000004305,ENSMUST00000115524,ENSMUST00000008179", "ENST00000336949", "19");
-            ResultBean resultBean = service.enumerate("test", "ENST00000375345,ENST00000227667,ENSMUST00000118649,ENSMUST00000034586,ENSMUST00000121916", "ENST00000375345", "19");
-
-
-            return resultBean;
+            return service.enumerate("test", "ENST00000375345,ENST00000227667,ENSMUST00000118649,ENSMUST00000034586,ENSMUST00000121916", "ENST00000375345", "19");
         } catch (PFREDServiceException ex) {
             ex.printStackTrace();
         }

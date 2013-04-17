@@ -14,8 +14,10 @@ use ensembl2;
 #use fasta2;
 use bowtie2;
 
+# incorrect order --dmitri
+# my ($BOWTIE,$BOWTIE_BUILD,$BOWTIE_INDEXES)= & exportEnv();
+my ($BOWTIE, $BOWTIE_INDEXES, $BOWTIE_BUILD) = exportEnv();
 
-my ($BOWTIE,$BOWTIE_BUILD,$BOWTIE_INDEXES)= & exportEnv();
 my $usage= "$0 -p primaryID -l oligoLength -f \"fastainputfile.fa containing transcript sequences any additional .fa files\" -o oligoOutFile \n";
 @ARGV>1 || die $usage;
 
@@ -108,7 +110,7 @@ sub enumerateSeq
 sub buildBowtieIndex
 {
     my ($basename, @fastaFiles)=@_;
-    my $BOWTIE_BUILD="/usr/local/share/applications/bowtie/bowtie-build";
+    #my $BOWTIE_BUILD="/usr/local/share/applications/bowtie/bowtie-build";
     my $basefiles=join ',',@fastaFiles;
     
     print STDERR "$BOWTIE_BUILD $basefiles $basename> dump\n";

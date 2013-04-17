@@ -1,4 +1,4 @@
-#!/opt/ActivePerl-5.16/bin/perl
+#!/usr/bin/perl
 
 #created on: July 15, 2010
 #created by: Qing Cao

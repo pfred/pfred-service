@@ -5,7 +5,7 @@
 
 echo "run input test.txt"
 
-cat outputSummary.csv | cut -f 1,5 -d ','>foo.csv
+cat EnumerationResult.csv | cut -f 1,5 -d ','>foo.csv
 sed '1d' foo.csv |tr ',' '\t'> test.txt
 
 IFILE="test.txt"
@@ -16,7 +16,7 @@ type="sense"
 mismatch="1"
 OFILE="antisenseOffTarget.out"
 
-perl asDNA_OffTargetSearch_bowtie.pl -s "$1" -g "$2" -t $type  -v "$3" $IFILE > $OFILE
+asDNA_OffTargetSearch_bowtie.pl -s "$1" -g "$2" -t $type  -v "$3" $IFILE > $OFILE
 
 echo "result:"
 #head $OFILE
@@ -26,5 +26,5 @@ echo "result:"
 head $OFILE
 
 
-cp outputSummary.csv outputSummaryBeforeMerge.csv
-cat outputSummaryBeforeMerge.csv|tr ',' '\t' |perl mergeEx.pl 1 1 antisenseOffTarget.out keepAll 1|tr '\t' ','>outputSummary.csv
+cp EnumerationResult.csv outputSummaryBeforeMerge.csv
+cat outputSummaryBeforeMerge.csv|tr ',' '\t' |mergeEx.pl 1 1 antisenseOffTarget.out keepAll 1|tr '\t' ','>ASOOffTargetSearchResult.csv

@@ -25,6 +25,7 @@ my %siRNAIndex=("human" => ["HumancDNA.v56"],
 sub exportEnv
 {
 	print STDERR "ENV: $BOWTIE\n";
+        print STDERR "*** ['$BOWTIE', '$BOWTIE_INDEXES', '$BOWTIE_BUILD'] ***\n";
 	return ($BOWTIE,$BOWTIE_INDEXES,$BOWTIE_BUILD);
 }
 

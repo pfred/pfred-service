@@ -37,26 +37,26 @@ import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.service.invoker.AbstractInvoker;
 import org.codehaus.xfire.transport.http.XFireServletController;
 import org.pfred.service.exception.PFREDServiceException;
-import org.pfred.service.model.ResultBean;
 
 @WebService(name = "IPFREDService", targetNamespace = "http://service.pfred.org")
 public class PFREDServiceImpl implements IPFREDService {
 
     private static Logger logger = Logger.getLogger(PFREDServiceImpl.class.getName());
     private static String runDirectory = System.getenv("RUN_DIR");
+    private static String scriptsDirectory = System.getenv("SCRIPTS_DIR");
 
     @Override
     public String getOrthologs(@WebParam(name = "runName") String runName, @WebParam(name = "enseblID") String enseblID, @WebParam(name = "requestedSpecies") String requestedSpecies, @WebParam(name = "species") String species) throws PFREDServiceException {
         logRemoteHost("getOrthologs");
 
         String fullRunDirectory = prepareRunDir(runName);
-        String outputFilePath = fullRunDirectory + "/seqAnnotation.csv";
-        String command = "getOrthologs.sh  " + enseblID + " " + species + " " + requestedSpecies + " " + outputFilePath;
+        String command = "getOrthologs.sh  " + enseblID + " " + species + " " + requestedSpecies;
 
         boolean success = runCommandThroughShell(command, fullRunDirectory);
         String returnValue = "";
         if (success) {
             logger.info("Shell command run successfully");
+            String outputFilePath = fullRunDirectory + "/seqAnnotation.csv";
             try {
                 returnValue = readFileAsString(outputFilePath);
             } catch (IOException ex) {
@@ -69,81 +69,115 @@ public class PFREDServiceImpl implements IPFREDService {
     }
 
     @Override
-    public ResultBean enumerate(@WebParam(name = "runName") String runName, @WebParam(name = "secondaryTranscriptIDs") String secondaryTranscriptIDs, @WebParam(name = "primaryTranscriptID") String primaryTranscriptID, @WebParam(name = "oligoLen") String oligoLen) throws PFREDServiceException {
+    public String[] enumerate(@WebParam(name = "runName") String runName, @WebParam(name = "secondaryTranscriptIDs") String secondaryTranscriptIDs, @WebParam(name = "primaryTranscriptID") String primaryTranscriptID, @WebParam(name = "oligoLen") String oligoLen) throws PFREDServiceException {
         logRemoteHost("enumerate");
+        String shellScript = "Enumeration.sh";
+        String outputFile = "EnumerationResult.csv";
+        String seqFile = "sequence.fa";
 
         String fullRunDirectory = prepareRunDir(runName);
 
-        String command = "RnaEnumerator.sh  " + secondaryTranscriptIDs + " " + primaryTranscriptID + " " + oligoLen + "";
+        String command = shellScript + " " + secondaryTranscriptIDs + " " + primaryTranscriptID + " " + oligoLen + "";
 
         boolean success = runCommandThroughShell(command, fullRunDirectory);
 
-        ResultBean resultBean = new ResultBean();
+        String[] results = new String[2];
         if (success) {
             logger.info("Shell command run successfully");
-            String results[] = new String[2];
+
             try {
-                results[0] = readFileAsString(fullRunDirectory + "/outputSummary.csv");
+                results[0] = readFileAsString(fullRunDirectory + "/" + outputFile);
 
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Error reading file outputSummary.csv", ex);
+                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/" + outputFile, ex);
             }
 
             try {
-                results[1] = readFileAsString(fullRunDirectory + "/sequence.fa");
+                results[1] = readFileAsString(fullRunDirectory + "/" + seqFile);
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Error reading file sequence.fa", ex);
+                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/" + seqFile, ex);
             }
 
-            resultBean.setResults(results);
         } else {
             logger.info("Shell command run failed");
         }
 
-        return resultBean;
+        return results;
     }
-    
+
     @Override
     public String runsiOffTargetSearch(@WebParam(name = "runName") String runName, @WebParam(name = "species") String species, @WebParam(name = "IDs") String IDs, @WebParam(name = "missMatches") String missMatches) throws PFREDServiceException {
         logRemoteHost("runsiOffTargetSearch");
+        String shellScript = "siRNAOffTargetSearch.sh";
+        String outputFile = "siRNAOffTargetSearchResult.csv";
 
         String fullRunDirectory = prepareRunDir(runName);
 
-        String command = "RNAiDesign---siRNAOffTargetSearchwithBowtie.sh " + species + " " + IDs + " " + missMatches;
+        String command = shellScript + " " + species + " " + IDs + " " + missMatches;
 
         boolean success = runCommandThroughShell(command, fullRunDirectory);
         String returnValue = "";
         if (success) {
             logger.info("Shell command run successfully");
             try {
-                returnValue = readFileAsString(fullRunDirectory + "/outputSummary.csv");
+                returnValue = readFileAsString(fullRunDirectory + "/" + outputFile);
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/outputSummary.csv", ex);
+                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/" + outputFile, ex);
             }
         } else {
             logger.info("Shell command run failed");
         }
-        return returnValue;      
+        return returnValue;
     }
 
     @Override
     public String runsiActivityModel(@WebParam(name = "runName") String runName, @WebParam(name = "primarySequence") String primarySequence) throws PFREDServiceException {
         logRemoteHost("runsiActivityModel");
+        String shellScript = "siRNAActivityModel.sh";
+        String outputFile = "siRNAActivityModelResult.csv";
+        String targetFile = "target.txt";
 
         String fullRunDirectory = prepareRunDir(runName);
 
-        saveStringAsFile(fullRunDirectory + "/target.txt", primarySequence);
+        saveStringAsFile(fullRunDirectory + "/" + targetFile, primarySequence);
 
-        String command = "RNAiDesignEfficacySVMmodel19mers.csh";
+        copyFile(scriptsDirectory + "/siRNA_2431seq_modelBuilding.csv", fullRunDirectory);
+
+        String command = shellScript;
 
         boolean success = runCommandThroughShell(command, fullRunDirectory);
         String returnValue = "";
         if (success) {
             logger.info("Shell command run successfully");
             try {
-                returnValue = readFileAsString(fullRunDirectory + "/outputSummary.csv");
+                returnValue = readFileAsString(fullRunDirectory + "/" + outputFile);
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/outputSummary.csv", ex);
+                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/" + outputFile, ex);
+            }
+        } else {
+            logger.info("Shell command run failed");
+        }
+        return returnValue;
+    }
+
+    @Override
+    public String runAntisenseOffTargetSearch(@WebParam(name = "runName") String runName, @WebParam(name = "species") String species, @WebParam(name = "IDs") String IDs, @WebParam(name = "missMatches") String missMatches) throws PFREDServiceException {
+        logRemoteHost("runAntisenseOffTargetSearch");
+        String shellScript = "ASOOffTargetSearch.sh";
+        String outputFile = "ASOOffTargetSearchResult.csv";
+
+        String fullRunDirectory = prepareRunDir(runName);
+
+        String command = shellScript+ " " + species + " " + IDs + " " + missMatches;
+
+        boolean success = runCommandThroughShell(command, fullRunDirectory);
+        String returnValue = "";
+        if (success) {
+            logger.info("Shell command run successfully");
+            try {
+                returnValue = readFileAsString(fullRunDirectory + "/" + outputFile);
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/" + outputFile, ex);
             }
         } else {
             logger.info("Shell command run failed");
@@ -154,21 +188,41 @@ public class PFREDServiceImpl implements IPFREDService {
     @Override
     public String runAntisenseActivityModel(@WebParam(name = "runName") String runName, @WebParam(name = "primarySequence") String primarySequence, @WebParam(name = "oligoLen") String oligoLen) throws PFREDServiceException {
         logRemoteHost("runAntisenseActivityModel");
-        String fullRunDirectory = runDirectory + '/' + runName;
+        String shellScript = "ASOActivityModel.sh";
+        String outputFile = "ASOActivityModelResult.csv";
+        String targetFile = "target.txt";
+        
+        String fullRunDirectory = prepareRunDir(runName);
 
-        saveStringAsFile(fullRunDirectory + "/target.seq", primarySequence);
+        saveStringAsFile(fullRunDirectory + "/"+targetFile, primarySequence);
 
-        String command = "RNAiDesign---antisenseScore1.sh " + oligoLen;
+        copyFile(scriptsDirectory + "/input_15_21_100_1000_12.txt", fullRunDirectory);
+        copyFile(scriptsDirectory + "/AOBase_542seq_cleaned_modelBuilding_Jan2009_15_21_noOutliers.csv", fullRunDirectory);
 
-        runCommandThroughShell(command, fullRunDirectory);
 
-        try {
-            String result = readFileAsString(fullRunDirectory + "/outputSummary.csv");
-            return result;
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Error reading file outputSummary.csv", ex);
-            return "";
+        String command = shellScript;
+
+        boolean success = runCommandThroughShell(command, fullRunDirectory);
+        String returnValue = "";
+
+        if (success) {
+            logger.info("Shell command run successfully");
+            try {
+                returnValue = readFileAsString(fullRunDirectory + "/"+outputFile);
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, "Error reading file: " + fullRunDirectory + "/"+outputFile, ex);
+            }
+        } else {
+            logger.info("Shell command run failed");
         }
+        return returnValue;
+    }
+
+    @Override
+    public void cleanRunDir(@WebParam(name = "runName") String runName) throws PFREDServiceException {
+        logRemoteHost("cleanRunDir");
+        String fullRunDirectory = runDirectory + '/' + runName;
+        removeDir(fullRunDirectory);
     }
 
     private boolean runCommandThroughShell(String command, String directory) {
@@ -196,9 +250,10 @@ public class PFREDServiceImpl implements IPFREDService {
                 logger.log(Level.SEVERE, null, ex);
             }
             try {
-                String line;
-                while ((line = in.readLine()) != null) {
-                    logger.info(line);
+                String line = in.readLine();
+                while (line != null) {
+                    line = in.readLine();
+                    Thread.sleep(1);
                 }
                 proc.waitFor();
                 in.close();
@@ -210,34 +265,6 @@ public class PFREDServiceImpl implements IPFREDService {
             }
         }
         return true;
-    }
-
-    @Override
-    public String runAntisenseOffTargetSearch(@WebParam(name = "runName") String runName, @WebParam(name = "species") String species, @WebParam(name = "IDs") String IDs, @WebParam(name = "missMatches") String missMatches) throws PFREDServiceException {
-        logRemoteHost("runAntisenseOffTargetSearch");
-
-        String fullRunDirectory = runDirectory + '/' + runName;
-
-        String command = "RNAiDesign---antisenseOffTargetSearchwithBowtie.sh " + species + " " + IDs + " " + missMatches;
-
-
-        runCommandThroughShell(command, fullRunDirectory);
-
-
-        try {
-            String result = readFileAsString(fullRunDirectory + "/outputSummary.csv");
-            return result;
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Error reading file outputSummary.csv", ex);
-            return "";
-        }
-    }
-
-    @Override
-    public void cleanRunDir(@WebParam(name = "runName") String runName) throws PFREDServiceException {
-        logRemoteHost("cleanRunDir");
-        String fullRunDirectory = runDirectory + '/' + runName;
-        removeDir(fullRunDirectory);
     }
 
     private String readFileAsString(String filePath) throws java.io.IOException {
@@ -265,12 +292,13 @@ public class PFREDServiceImpl implements IPFREDService {
         }
     }
 
-    private boolean copyScript(String scriptPath, String runDirectory) {
-        File file = new File(runDirectory);
+    private boolean copyFile(String filePath, String targetDirectory) {
+        File file = new File(filePath);
+        String fileName = file.getName();
         try {
-            Runtime.getRuntime().exec("cp " + scriptPath + " .", null, file);
+            Runtime.getRuntime().exec("cp " + filePath + " " + targetDirectory + "/" + fileName);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Error copying script", ex);
+            logger.log(Level.SEVERE, "Error copying file from " + filePath + " to " + targetDirectory, ex);
             return false;
         }
         return true;

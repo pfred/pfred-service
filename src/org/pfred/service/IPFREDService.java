@@ -20,7 +20,6 @@
 package org.pfred.service;
 
 import org.pfred.service.exception.PFREDServiceException;
-import org.pfred.service.model.ResultBean;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
@@ -29,7 +28,16 @@ public interface IPFREDService {
 
     public String getOrthologs(@WebParam(name = "runName") String runName, @WebParam(name = "enseblID") String enseblID, @WebParam(name = "requestedSpecies") String requestedSpecies, @WebParam(name = "species") String species) throws PFREDServiceException;
 
-    public ResultBean enumerate(@WebParam(name = "runName") String runName, @WebParam(name = "secondaryTranscriptIDs") String secondaryTranscriptIDs, @WebParam(name = "primaryTranscriptID") String primaryTranscriptID, @WebParam(name = "oligoLen") String oligoLen) throws PFREDServiceException;
+    /**
+     * Return enumeration result and sequene
+     * @param runName
+     * @param secondaryTranscriptIDs
+     * @param primaryTranscriptID
+     * @param oligoLen
+     * @return String array with two elements, first one is enumeration result, second one is sequence
+     * @throws PFREDServiceException 
+     */
+    public String[] enumerate(@WebParam(name = "runName") String runName, @WebParam(name = "secondaryTranscriptIDs") String secondaryTranscriptIDs, @WebParam(name = "primaryTranscriptID") String primaryTranscriptID, @WebParam(name = "oligoLen") String oligoLen) throws PFREDServiceException;
 
     public String runAntisenseOffTargetSearch(@WebParam(name = "runName") String runName, @WebParam(name = "species") String species, @WebParam(name = "IDs") String IDs, @WebParam(name = "missMatches") String missMatches) throws PFREDServiceException;
 
