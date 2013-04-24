@@ -227,37 +227,3 @@ $gc[0][0]="";
 return @gc;
 }
 
-######################################
-#for each fastaseq in the the array,
-#set the number of letters in each
-#line of sequence to that specied
-##################################### 
-sub formatNumberOfLetters{
-my ($numOfLettersPerLine,@fastaSeqs)=@_;
-my @newFasta=();
-for (my $i=0;$i<@fastaSeqs;$i++){
-  my @lines=split(/\n/,$fastaSeqs[$i]);
-  my $seq="";
-  my $header="";
-  for (my $j=0;$j<@lines;$j++){
-     if($lines[$j]=~/^>/){
-       $header=$lines[$j]."\n";
-      }
-     else{
-      $seq=$seq.$lines[$j];
-     }
-    }
-  my $numOfLetters=length($seq);
-  my $skip=0;
-  my $newSeq="";
-  while($skip<$numOfLetters){
-   my $line=substr($seq,$skip,$numOfLettersPerLine);
-   $newSeq=$newSeq.$line."\n";
-   $skip=$skip+length($line);
-   }
-  push(@newFasta,$header.$newSeq);
- } #next fasta entry
-return @newFasta;
-}
-
-1;
