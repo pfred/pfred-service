@@ -1,42 +1,4 @@
-#dcaffrey
-#parses blast files
-#save this file in /path/bin
-#and use as follows:
-#use lib '/path/bin';
-#use fasta
-use strict;
-#################
-#Load the sequence
-###################
-sub loadSequences2
-{
-    my (@fileNames)=@_;
-    my %fastaSeqs;  #% $fastaSeq{$shortname}[longname,sequence]
-    while (my $fileName=shift @fileNames){
-	open (FH,"<$fileName")||print STDERR "fasta2.pm: loadSequences2(): Can not open file $fileName\n";
-	print STDERR "Loading sequenses from file $fileName\n";
-	my ($empty,$shortname,$other);
-	my $l="";
-	while ($l=<FH>){
-		$l=~ s/^\s+|\s+$//g;
-#		print STDERR "$l\n";
-		if($l=~/^\>/){
-			($empty, $shortname,$other)=split />|,|\s|\|/,$l;
-#			print STDERR "ShortName $shortname\n";
-			$fastaSeqs{$shortname}=[$l,""];	
-#			print STDERR "$shortname\n$fastaSeqs{$shortname}->[1]\n";
 
-		}
-		else{
-			$fastaSeqs{$shortname}->[1] .=$l;
-		}
-	}
-	close FH;
-    }
-	return %fastaSeqs;
-}
-
-#write to fastafile
 
 
 
