@@ -147,7 +147,8 @@ for (my $i=0;$i<@fastaSeqs;$i++){
        push(@names,$header);
       }
    }
-}
+//Tianhong, making some changes in the demo branch, not the master branch
+//try to push to remote repository later
 return @names;
 }
 ################################
