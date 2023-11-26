@@ -67,19 +67,19 @@ sub cleanup {
     $$string1 = $1;
     #print "$$string1";
   }
-  #Pfizer old PF compounds
+
   #elsif ( $$string1 =~/^PF-(\d{6})-\d{2}/i ) {
   #  $$string1 = "PF-00".$1;
   #}
-  #Pfizer old PF compounds
+
   #elsif ( $$string1 =~/PF-(\d{6}$)/i ) {
   #  $$string1 = "PF-00".$1;
   #}
-  #pfizer new PF compounds
+
   elsif ( $$string1 =~/(^PF-\d{8})/i ) {
     $$string1 = $1;
   }
-  #all other legacy pfizer compounds
+
   elsif ( $$string1 =~/(^\w{2}-\d{6})-\d{2}/i ) {
     $$string1 = $1;
   }

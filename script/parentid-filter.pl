@@ -45,15 +45,15 @@ while ($input_line){
 sub cleanup {
   my $string1=shift;
   $$string1 = uc($$string1);
-  #Pfizer old PF compounds
+
   if ( $$string1 =~/^PF-(\d{6})-\d{2}/i ) {
     $$string1 = "PF-00".$1;
   }
-  #Pfizer old PF compounds
+
   elsif ( $$string1 =~/PF-(\d{6}$)/i ) {
     $$string1 = "PF-00".$1;
   }
-  #pfizer new PF compounds
+
   elsif ( $$string1 =~/(^PF-\d{8})/i ) {
     $$string1 = $1;
   }

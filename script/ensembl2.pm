@@ -9,13 +9,13 @@ use fasta2;
 use strict;
 
 my $registry = 'Bio::EnsEMBL::Registry';
-#my $host='pandora.pfizer.com'; 
+
 my $host='ensembldb.ensembl.org';
 my $port='5306';
 sub connect{
 
 $registry->load_registry_from_db(
-#-host => 'pandora.pfizer.com',
+
 -host => 'ensembldb.ensembl.org',
 -port => '5306',
 -user => 'anonymous',
